@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[schemas.Transfer])
-def list_transfers(
+async def list_transfers(
     db: Session = Depends(deps.get_db),
     skip: int = DEFAULT_PAGE,
     limit: int = DEFAULT_LIMIT
@@ -27,7 +27,7 @@ def list_transfers(
 
 
 @router.get("/{id}", response_model=schemas.Transfer)
-def list_transfer(
+async def list_transfer(
         *,
         db: Session = Depends(deps.get_db),
         id: int
@@ -42,7 +42,7 @@ def list_transfer(
 
 
 @router.post("/", response_model=schemas.Transfer)
-def create_transfer(
+async def create_transfer(
     *,
     db: Session = Depends(deps.get_db),
     transfer_in: schemas.TransferCreate
@@ -59,7 +59,7 @@ def create_transfer(
 
 
 @router.put("/{id}", response_model=schemas.Transfer)
-def update_transfer(
+async def update_transfer(
     *,
     db: Session = Depends(deps.get_db),
     id: int,
@@ -76,7 +76,7 @@ def update_transfer(
 
 
 @router.delete("/{id}", response_model=schemas.Transfer)
-def delete_item(
+async def delete_item(
     *,
     db: Session = Depends(deps.get_db),
     id: int,

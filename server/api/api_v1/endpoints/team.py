@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[schemas.Team])
-def list_teams(
+async def list_teams(
     db: Session = Depends(deps.get_db),
     skip: int = DEFAULT_PAGE,
     limit: int = DEFAULT_LIMIT
@@ -27,7 +27,7 @@ def list_teams(
 
 
 @router.get("/{id}", response_model=schemas.Team)
-def list_team(
+async def list_team(
         *,
         db: Session = Depends(deps.get_db),
         id: int
@@ -42,7 +42,7 @@ def list_team(
 
 
 @router.post("/", response_model=schemas.Team)
-def create_team(
+async def create_team(
     *,
     db: Session = Depends(deps.get_db),
     team_in: schemas.TeamCreate
@@ -55,7 +55,7 @@ def create_team(
 
 
 @router.put("/{id}", response_model=schemas.Team)
-def update_team(
+async def update_team(
     *,
     db: Session = Depends(deps.get_db),
     id: int,
@@ -72,7 +72,7 @@ def update_team(
 
 
 @router.delete("/{id}", response_model=schemas.Team)
-def delete_item(
+async def delete_item(
     *,
     db: Session = Depends(deps.get_db),
     id: int,

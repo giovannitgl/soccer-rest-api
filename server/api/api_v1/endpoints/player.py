@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[schemas.Player])
-def list_players(
+async def list_players(
     db: Session = Depends(deps.get_db),
     skip: int = DEFAULT_PAGE,
     limit: int = DEFAULT_LIMIT
@@ -27,7 +27,7 @@ def list_players(
 
 
 @router.get("/{id}", response_model=schemas.Player)
-def list_player(
+async def list_player(
         *,
         db: Session = Depends(deps.get_db),
         id: int
@@ -42,7 +42,7 @@ def list_player(
 
 
 @router.post("/", response_model=schemas.Player)
-def create_player(
+async def create_player(
     *,
     db: Session = Depends(deps.get_db),
     player_in: schemas.PlayerCreate
@@ -55,7 +55,7 @@ def create_player(
 
 
 @router.put("/{id}", response_model=schemas.Player)
-def update_player(
+async def update_player(
     *,
     db: Session = Depends(deps.get_db),
     id: int,
@@ -72,7 +72,7 @@ def update_player(
 
 
 @router.delete("/{id}", response_model=schemas.Player)
-def delete_item(
+async def delete_item(
     *,
     db: Session = Depends(deps.get_db),
     id: int,
