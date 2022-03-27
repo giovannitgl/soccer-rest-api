@@ -7,6 +7,16 @@ class TeamBase(BaseModel):
     country: str
 
 
+# Properties for creating a team
+class TeamCreate(TeamBase):
+    pass
+
+
+# Properties for updating a team
+class TeamUpdate(TeamBase):
+    pass
+
+
 # All shared properties for a team in DB
 class TeamInDBBase(TeamBase):
     id: int
@@ -16,4 +26,9 @@ class TeamInDBBase(TeamBase):
 
 
 class TeamInDB(TeamInDBBase):
+    pass
+
+
+# Properties for get team
+class Team(TeamInDB):
     pass
