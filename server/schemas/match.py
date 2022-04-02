@@ -10,9 +10,13 @@ class MatchBase(BaseModel):
 
 # Properties for creating a match
 class MatchCreate(MatchBase):
-    tournament_id: int
     team_1_id: int
     team_2_id: int
+
+
+# Properties used internally for creating a match.
+class MatchCreateInternal(MatchCreate):
+    tournament_id: int
 
 
 # Properties for update a match

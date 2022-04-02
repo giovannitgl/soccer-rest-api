@@ -23,7 +23,7 @@ async def list_matches(
     tournament = cruds.tournament.get(db=db, id=tournament_id)
     if not tournament:
         raise HTTPException(status_code=404, detail="Tournament not found")
-    return cruds.match.get_multi(db, skip=skip, limit=limit)
+    return cruds.match.get_multi_with_tournament(db, tournament_id=tournament_id, skip=skip, limit=limit)
 
 
 @router.get("/{tournament_id}/match", response_model=schemas.Match)
@@ -40,7 +40,7 @@ async def list_match(
     tournament = cruds.tournament.get(db=db, id=tournament_id)
     if not tournament:
         raise HTTPException(status_code=404, detail="Tournament not found")
-    match = cruds.match.get(db, match_id)
+    match = cruds.match.get_with_tournament(db, match_id, tournament_id=tournament_id)
     if not match:
         raise HTTPException(status_code=404, detail="Match not found")
     return match
@@ -59,7 +59,10 @@ async def create_match(
     tournament = cruds.tournament.get(db=db, id=tournament_id)
     if not tournament:
         raise HTTPException(status_code=404, detail="Tournament not found")
-    match = cruds.match.create(db=db, obj_in=match_in)
+    if not tournament.team_in_tournament(match_in.team_1_id) or not tournament.team_in_tournament(match_in.team_2_id):
+        raise HTTPException(status_code=422, detail="Teams must be in the tournament")
+    match_create = schemas.MatchCreateInternal(**match_in.__dict__, tournament_id=tournament_id)
+    match = cruds.match.create(db=db, obj_in=match_create)
     return match
 
 
@@ -77,7 +80,7 @@ async def update_match(
     tournament = cruds.tournament.get(db=db, id=tournament_id)
     if not tournament:
         raise HTTPException(status_code=404, detail="Tournament not found")
-    match = cruds.match.get(db=db, id=match_id, tournament_id=tournament_id)
+    match = cruds.match.get_with_tournament(db=db, id=match_id, tournament_id=tournament_id)
     if not match:
         raise HTTPException(status_code=404, detail="Match not found")
     match = cruds.match.update(db=db, db_obj=match, obj_in=match_in)
@@ -94,7 +97,7 @@ async def delete_item(
     """
     Delete a match.
     """
-    match = cruds.match.get(db=db, id=match_id, tournament_id=tournament_id)
+    match = cruds.match.get_with_tournament(db=db, id=match_id, tournament_id=tournament_id)
     if not match:
         raise HTTPException(status_code=404, detail="Match not found")
     match = cruds.match.remove(db=db, id=match_id)
