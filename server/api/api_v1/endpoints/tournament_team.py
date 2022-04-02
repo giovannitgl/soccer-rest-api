@@ -11,7 +11,7 @@ from server.settings import DEFAULT_PAGE, DEFAULT_LIMIT
 router = APIRouter()
 
 
-@router.get("/{tournament_id}/team", response_model=List[schemas.Team])
+@router.get("/", response_model=List[schemas.Team])
 async def list_tournament_teams(
     tournament_id: int,
     db: Session = Depends(deps.get_db),
@@ -28,7 +28,7 @@ async def list_tournament_teams(
     return cruds.team.get_multi_by_ids(db, ids=ids, skip=skip, limit=limit)
 
 
-@router.post("/{tournament_id}/team", response_model=schemas.Tournament)
+@router.post("/", response_model=schemas.Tournament)
 async def add_tournament_team(
     *,
     db: Session = Depends(deps.get_db),
@@ -48,7 +48,7 @@ async def add_tournament_team(
     return tournament
 
 
-@router.delete("/{tournament_id}/team/{team_id}", response_model=schemas.Tournament)
+@router.delete("/{team_id}", response_model=schemas.Tournament)
 async def remove_team_from_tournament(
     *,
     db: Session = Depends(deps.get_db),

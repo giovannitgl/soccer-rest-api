@@ -17,11 +17,7 @@ async def list_players(
     limit: int = DEFAULT_LIMIT
 ) -> Any:
     """
-    L
-    :param db:
-    :param skip:
-    :param limit:
-    :return:
+    List players
     """
     return cruds.player.get_multi(db, skip=skip, limit=limit)
 

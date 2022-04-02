@@ -22,5 +22,6 @@ class MatchEvent(Base):
     match_id = Column(Integer, ForeignKey("match.id"), nullable=False)
     time = Column(DateTime, nullable=False)
     event_type = Column(ChoiceType(EventType, impl=Integer()))
+    player_id = Column(Integer, ForeignKey("player.id"), nullable=True)
     string_value = Column(String, nullable=True)
     integer_value = Column(Integer, nullable=True)

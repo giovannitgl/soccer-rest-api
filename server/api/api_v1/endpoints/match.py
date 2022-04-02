@@ -10,7 +10,7 @@ from server.settings import DEFAULT_PAGE, DEFAULT_LIMIT
 router = APIRouter()
 
 
-@router.get("/{tournament_id}/match", response_model=List[schemas.Match])
+@router.get("/", response_model=List[schemas.Match])
 async def list_matches(
     tournament_id: int,
     db: Session = Depends(deps.get_db),
@@ -26,16 +26,15 @@ async def list_matches(
     return cruds.match.get_multi_with_tournament(db, tournament_id=tournament_id, skip=skip, limit=limit)
 
 
-@router.get("/{tournament_id}/match", response_model=schemas.Match)
+@router.get("/{match_id}", response_model=schemas.Match)
 async def list_match(
     *,
     db: Session = Depends(deps.get_db),
     tournament_id: int,
     match_id: int
-
 ) -> Any:
     """
-    List matchs.
+    Detail a match.
     """
     tournament = cruds.tournament.get(db=db, id=tournament_id)
     if not tournament:
@@ -46,7 +45,7 @@ async def list_match(
     return match
 
 
-@router.post("/{tournament_id}/match", response_model=schemas.Match)
+@router.post("/", response_model=schemas.Match)
 async def create_match(
     *,
     db: Session = Depends(deps.get_db),
@@ -66,7 +65,7 @@ async def create_match(
     return match
 
 
-@router.put("/{tournament_id}/match/{match_id}", response_model=schemas.Match)
+@router.put("/{match_id}", response_model=schemas.Match)
 async def update_match(
     *,
     db: Session = Depends(deps.get_db),
@@ -87,7 +86,7 @@ async def update_match(
     return match
 
 
-@router.delete("/{tournament_id}/match/{match_id}", response_model=schemas.Match)
+@router.delete("/{match_id}", response_model=schemas.Match)
 async def delete_item(
     *,
     db: Session = Depends(deps.get_db),

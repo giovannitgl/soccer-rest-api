@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from server import cruds, schemas
 from server.api import deps
-from server.api.api_v1.endpoints import match, tournament_team
+from server.api.api_v1.endpoints import match, tournament_team, match_event
 from server.settings import DEFAULT_PAGE, DEFAULT_LIMIT
 
 router = APIRouter()
@@ -18,11 +18,7 @@ async def list_tournaments(
     limit: int = DEFAULT_LIMIT
 ) -> Any:
     """
-    L
-    :param db:
-    :param skip:
-    :param limit:
-    :return:
+    List tournaments
     """
     return cruds.tournament.get_multi(db, skip=skip, limit=limit)
 
@@ -87,5 +83,3 @@ async def delete_item(
     tournament = cruds.tournament.remove(db=db, id=id)
     return tournament
 
-router.include_router(match.router)
-router.include_router(tournament_team.router)
