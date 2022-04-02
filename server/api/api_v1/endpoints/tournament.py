@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from server import cruds, schemas
 from server.api import deps
-from server.api.api_v1.endpoints import match
+from server.api.api_v1.endpoints import match, tournament_team
 from server.settings import DEFAULT_PAGE, DEFAULT_LIMIT
 
 router = APIRouter()
@@ -88,3 +88,4 @@ async def delete_item(
     return tournament
 
 router.include_router(match.router)
+router.include_router(tournament_team.router)

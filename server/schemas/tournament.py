@@ -19,6 +19,11 @@ class TournamentUpdate(TournamentBase):
     pass
 
 
+# Properties for adding team in tournament
+class TournamentAddTeam(BaseModel):
+    team_id: int
+
+
 # All shared properties for a tournament in DB
 class TournamentInDBBase(TournamentBase):
     id: int
