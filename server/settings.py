@@ -7,3 +7,6 @@ API_V1_STR: str = '/api/v1'
 
 DEFAULT_PAGE: int = 0
 DEFAULT_LIMIT: int = 10
+
+SEND_EVENTS_TO_QUEUE = environ.get('SEND_EVENTS_TO_QUEUE', 'true') == 'true'
+RABBITMQ_HOST = environ.get('RABBITMQ_HOST', 'localhost')

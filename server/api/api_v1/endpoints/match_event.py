@@ -1,11 +1,12 @@
 from typing import Any, List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
-from server import cruds, schemas
+from server import cruds, schemas, settings
 from server.api import deps
-from server.models.match_event import EventType
+from server.models.match_event import EventType, get_event_message
+from server.queue.rabbitmq import RabbitClient
 from server.settings import DEFAULT_PAGE, DEFAULT_LIMIT
 
 router = APIRouter()
@@ -22,7 +23,14 @@ def validate_exists(db: Session, tournament_id: int, match_id: int) -> None:
         raise HTTPException(status_code=400, detail="Match does not belong to this tournament")
 
 
-@router.get("/", response_model=List[schemas.MatchEvent])
+def send_to_queue(client: RabbitClient, match_id: int, event: schemas.MatchEventOutput) -> None:
+    if settings.SEND_EVENTS_TO_QUEUE:
+        routing_key = f'match:{match_id}'
+        message = event.json()
+        client.publish_to_topic(routing_key, message)
+
+
+@router.get("/", response_model=List[schemas.MatchEventOutput])
 async def list_events(
     tournament_id: int,
     match_id: int,
@@ -34,12 +42,20 @@ async def list_events(
     List events in a match
     """
     validate_exists(db, tournament_id, match_id)
-    return cruds.match_event.get_multi_for_match(db, match_id=match_id, skip=skip, limit=limit)
+    events = cruds.match_event.get_multi_for_match(db, match_id=match_id, skip=skip, limit=limit)
+    messages = []
+    for event in events:
+        messages.append(schemas.MatchEventOutput(
+            time=event.time,
+            message=get_event_message(db, event)
+        ))
+    return messages
 
 
-@router.post("/start", response_model=schemas.MatchEvent)
+@router.post("/start", response_model=schemas.MatchEventOutput)
 async def register_start(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     tournament_id: int,
     match_id: int,
@@ -52,12 +68,15 @@ async def register_start(
     event_create = schemas.MatchEventCreateInternal(**event_in.__dict__,
                                                     match_id=match_id, event_type=EventType.start)
     event = cruds.match_event.create(db=db, obj_in=event_create)
+    event = schemas.MatchEventOutput(time=event.time, message=get_event_message(db, event))
+    send_to_queue(request.app.rabbit_client, match_id, event)
     return event
 
 
-@router.post("/end", response_model=schemas.MatchEvent)
+@router.post("/end", response_model=schemas.MatchEventOutput)
 async def register_end(
         *,
+        request: Request,
         db: Session = Depends(deps.get_db),
         tournament_id: int,
         match_id: int,
@@ -70,12 +89,15 @@ async def register_end(
     event_create = schemas.MatchEventCreateInternal(**event_in.__dict__,
                                                     match_id=match_id, event_type=EventType.end)
     event = cruds.match_event.create(db=db, obj_in=event_create)
+    event = schemas.MatchEventOutput(time=event.time, message=get_event_message(db, event))
+    send_to_queue(request.app.rabbit_client, match_id, event)
     return event
 
 
-@router.post("/goal", response_model=schemas.MatchEvent)
+@router.post("/goal", response_model=schemas.MatchEventOutput)
 async def register_goal(
         *,
+        request: Request,
         db: Session = Depends(deps.get_db),
         tournament_id: int,
         match_id: int,
@@ -91,12 +113,15 @@ async def register_goal(
     event_create = schemas.MatchEventCreateInternal(**data,  match_id=match_id,
                                                     event_type=EventType.goal)
     event = cruds.match_event.create(db=db, obj_in=event_create)
+    event = schemas.MatchEventOutput(time=event.time, message=get_event_message(db, event))
+    send_to_queue(request.app.rabbit_client, match_id, event)
     return event
 
 
-@router.post("/halftime", response_model=schemas.MatchEvent)
+@router.post("/halftime", response_model=schemas.MatchEventOutput)
 async def register_half_time(
         *,
+        request: Request,
         db: Session = Depends(deps.get_db),
         tournament_id: int,
         match_id: int,
@@ -109,12 +134,15 @@ async def register_half_time(
     event_create = schemas.MatchEventCreateInternal(**event_in.__dict__,
                                                     match_id=match_id, event_type=EventType.half_time)
     event = cruds.match_event.create(db=db, obj_in=event_create)
+    event = schemas.MatchEventOutput(time=event.time, message=get_event_message(db, event))
+    send_to_queue(request.app.rabbit_client, match_id, event)
     return event
 
 
-@router.post("/stoppage", response_model=schemas.MatchEvent)
+@router.post("/stoppage", response_model=schemas.MatchEventOutput)
 async def register_stoppage(
         *,
+        request: Request,
         db: Session = Depends(deps.get_db),
         tournament_id: int,
         match_id: int,
@@ -130,12 +158,15 @@ async def register_stoppage(
     event_create = schemas.MatchEventCreateInternal(**data,  match_id=match_id,
                                                     event_type=EventType.stoppage_time)
     event = cruds.match_event.create(db=db, obj_in=event_create)
+    event = schemas.MatchEventOutput(time=event.time, message=get_event_message(db, event))
+    send_to_queue(request.app.rabbit_client, match_id, event)
     return event
 
 
-@router.post("/substitution", response_model=schemas.MatchEvent)
+@router.post("/substitution", response_model=schemas.MatchEventOutput)
 async def register_substitution(
         *,
+        request: Request,
         db: Session = Depends(deps.get_db),
         tournament_id: int,
         match_id: int,
@@ -153,12 +184,15 @@ async def register_substitution(
     event_create = schemas.MatchEventCreateInternal(**data,  match_id=match_id,
                                                     event_type=EventType.substitution)
     event = cruds.match_event.create(db=db, obj_in=event_create)
+    event = schemas.MatchEventOutput(time=event.time, message=get_event_message(db, event))
+    send_to_queue(request.app.rabbit_client, match_id, event)
     return event
 
 
-@router.post("/warning", response_model=schemas.MatchEvent)
+@router.post("/warning", response_model=schemas.MatchEventOutput)
 async def register_warning(
         *,
+        request: Request,
         db: Session = Depends(deps.get_db),
         tournament_id: int,
         match_id: int,
@@ -174,4 +208,6 @@ async def register_warning(
     event_create = schemas.MatchEventCreateInternal(**data,  match_id=match_id,
                                                     event_type=EventType.warning)
     event = cruds.match_event.create(db=db, obj_in=event_create)
+    event = schemas.MatchEventOutput(time=event.time, message=get_event_message(db, event))
+    send_to_queue(request.app.rabbit_client, match_id, event)
     return event

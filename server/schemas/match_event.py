@@ -11,6 +11,11 @@ class MatchEventBase(BaseModel):
     time: datetime
 
 
+# Readable output for match event
+class MatchEventOutput(MatchEventBase):
+    message: str
+
+
 # Properties for creating a match event
 class MatchEventCreate(MatchEventBase):
     pass
