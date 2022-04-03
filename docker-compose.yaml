@@ -1,0 +1,27 @@
+version: "3.8"
+services:
+    postgres:
+        image: postgres:14
+        restart: always
+        environment:
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: db
+        ports:
+            - "5432:5432"
+    rmq:
+        image: rabbitmq:3.8-management-alpine
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+    web:
+        build: .
+        command: ["./wait-for-it.sh", "rmq:5672", "--", "./start.sh"]
+        depends_on:
+            - postgres
+            - rmq
+        environment:
+            DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/db"
+            RABBITMQ_HOST: "rmq"
+            SEND_EVENTS_TO_QUEUE: "true"
+        ports:
+            - "8000:8000"

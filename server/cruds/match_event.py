@@ -3,7 +3,7 @@ from typing import List
 from sqlalchemy.orm import Session
 
 from server.cruds.base import CRUDBase
-from server.models import MatchEvent, Tournament
+from server.models import MatchEvent
 from server.schemas import MatchEventCreate, MatchEventUpdate
 
 

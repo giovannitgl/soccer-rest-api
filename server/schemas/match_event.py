@@ -1,9 +1,7 @@
-from datetime import date, datetime
+from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel
-
-from server.models.match_event import EventType
 
 
 # All Shared properties for a match event
@@ -62,7 +60,7 @@ class MatchEventWarningCreate(MatchEventCreate):
 # Internal properties when creating a match
 class MatchEventCreateInternal(MatchEventBase):
     match_id: int
-    event_type: EventType
+    event_type: int
     player_id: Optional[int]
     string_value: Optional[str]
     integer_value: Optional[int]
@@ -77,7 +75,7 @@ class MatchEventUpdate(MatchEventBase):
 class MatchEventInDBBase(MatchEventBase):
     id: int
     match_id: int
-    event_type: EventType
+    event_type: int
     string_value: Optional[str]
     integer_value: Optional[int]
 
