@@ -43,6 +43,6 @@ make run
 To test the pub/sub feature, you can run extra/consumer.py to check the messages being received.
 If you have a match with id 1 and 2, for example, you can run the following command:
 ```bash
-python extra/consumer.py match:1 match:2
+python extra/consumer.py rabbitmqhost match:1 match:2
 ```
 You will receive all the events created for them in a serialized json format.

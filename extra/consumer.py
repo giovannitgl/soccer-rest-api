@@ -5,8 +5,9 @@ receive messages.
 import pika
 import sys
 
+host = sys.argv[1]
 connection = pika.BlockingConnection(
-    pika.ConnectionParameters(host='localhost'))
+    pika.ConnectionParameters(host=host))
 channel = connection.channel()
 
 channel.exchange_declare(exchange='match', exchange_type='topic')
@@ -14,7 +15,7 @@ channel.exchange_declare(exchange='match', exchange_type='topic')
 result = channel.queue_declare('', exclusive=True)
 queue_name = result.method.queue
 
-binding_keys = sys.argv[1:]
+binding_keys = sys.argv[2:]
 if not binding_keys:
     sys.stderr.write("Usage: %s [binding_key]...\n" % sys.argv[0])
     sys.exit(1)
