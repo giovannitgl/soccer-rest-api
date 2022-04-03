@@ -32,13 +32,13 @@ class MatchEvent(Base):
         # Get player names on db
         player1_name = ''
         if self.player_id:
-            player = db.query(Player).filter(Player.id == id).first()
+            player = db.query(Player).filter(Player.id == self.player_id).first()
             if player:
                 player1_name = f'{player.first_name} {player.last_name}'
 
         player2_name = ''
         if self.integer_value and self.event_type == EventType.substitution:
-            player = db.query(Player).filter(Player.id == id).first()
+            player = db.query(Player).filter(Player.id == self.integer_value).first()
             if player:
                 player2_name = f'{player.first_name} {player.last_name}'
 

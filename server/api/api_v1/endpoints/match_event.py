@@ -46,7 +46,7 @@ async def list_events(
     for event in events:
         messages.append(schemas.MatchEventOutput(
             time=event.time,
-            message=event.event.get_event_message(db, event)
+            message=event.get_event_message(db)
         ))
     return messages
 
@@ -67,7 +67,7 @@ async def register_start(
     event_create = schemas.MatchEventCreateInternal(**event_in.__dict__,
                                                     match_id=match_id, event_type=models.EventType.start)
     event = cruds.match_event.create(db=db, obj_in=event_create)
-    event = schemas.MatchEventOutput(time=event.time, message=event.get_event_message(db, event))
+    event = schemas.MatchEventOutput(time=event.time, message=event.get_event_message(db))
     send_to_queue(request.app.rabbit_client, match_id, event)
     return event
 
@@ -88,7 +88,7 @@ async def register_end(
     event_create = schemas.MatchEventCreateInternal(**event_in.__dict__,
                                                     match_id=match_id, event_type=models.EventType.end)
     event = cruds.match_event.create(db=db, obj_in=event_create)
-    event = schemas.MatchEventOutput(time=event.time, message=event.get_event_message(db, event))
+    event = schemas.MatchEventOutput(time=event.time, message=event.get_event_message(db))
     send_to_queue(request.app.rabbit_client, match_id, event)
     return event
 
@@ -107,12 +107,12 @@ async def register_goal(
     """
     validate_exists(db, tournament_id, match_id)
     data = event_in.__dict__
-    data['integer_field'] = data['team_id']
+    data['integer_value'] = data['team_id']
     del data['team_id']
     event_create = schemas.MatchEventCreateInternal(**data,  match_id=match_id,
                                                     event_type=models.EventType.goal)
     event = cruds.match_event.create(db=db, obj_in=event_create)
-    event = schemas.MatchEventOutput(time=event.time, message=event.get_event_message(db, event))
+    event = schemas.MatchEventOutput(time=event.time, message=event.get_event_message(db))
     send_to_queue(request.app.rabbit_client, match_id, event)
     return event
 
@@ -133,7 +133,7 @@ async def register_half_time(
     event_create = schemas.MatchEventCreateInternal(**event_in.__dict__,
                                                     match_id=match_id, event_type=models.EventType.half_time)
     event = cruds.match_event.create(db=db, obj_in=event_create)
-    event = schemas.MatchEventOutput(time=event.time, message=event.get_event_message(db, event))
+    event = schemas.MatchEventOutput(time=event.time, message=event.get_event_message(db))
     send_to_queue(request.app.rabbit_client, match_id, event)
     return event
 
@@ -152,12 +152,12 @@ async def register_stoppage(
     """
     validate_exists(db, tournament_id, match_id)
     data = event_in.__dict__
-    data['integer_field'] = data['minutes']
+    data['integer_value'] = data['minutes']
     del data['minutes']
     event_create = schemas.MatchEventCreateInternal(**data,  match_id=match_id,
                                                     event_type=models.EventType.stoppage_time)
     event = cruds.match_event.create(db=db, obj_in=event_create)
-    event = schemas.MatchEventOutput(time=event.time, message=event.get_event_message(db, event))
+    event = schemas.MatchEventOutput(time=event.time, message=event.get_event_message(db))
     send_to_queue(request.app.rabbit_client, match_id, event)
     return event
 
@@ -177,13 +177,13 @@ async def register_substitution(
     validate_exists(db, tournament_id, match_id)
     data = event_in.__dict__
     data['player_id'] = data['player_out']
-    data['integer_field'] = data['player_in']
+    data['integer_value'] = data['player_in']
     del data['player_in']
     del data['player_out']
     event_create = schemas.MatchEventCreateInternal(**data,  match_id=match_id,
                                                     event_type=models.EventType.substitution)
     event = cruds.match_event.create(db=db, obj_in=event_create)
-    event = schemas.MatchEventOutput(time=event.time, message=event.get_event_message(db, event))
+    event = schemas.MatchEventOutput(time=event.time, message=event.get_event_message(db))
     send_to_queue(request.app.rabbit_client, match_id, event)
     return event
 
@@ -202,11 +202,11 @@ async def register_warning(
     """
     validate_exists(db, tournament_id, match_id)
     data = event_in.__dict__
-    data['string_field'] = data['warning_type']
+    data['string_value'] = data['warning_type']
     del data['warning_type']
     event_create = schemas.MatchEventCreateInternal(**data,  match_id=match_id,
                                                     event_type=models.EventType.warning)
     event = cruds.match_event.create(db=db, obj_in=event_create)
-    event = schemas.MatchEventOutput(time=event.time, message=event.get_event_message(db, event))
+    event = schemas.MatchEventOutput(time=event.time, message=event.get_event_message(db))
     send_to_queue(request.app.rabbit_client, match_id, event)
     return event

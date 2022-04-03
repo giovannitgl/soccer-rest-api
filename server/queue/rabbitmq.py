@@ -16,4 +16,4 @@ class RabbitClient:
     def publish_to_topic(self, routing_key: str, message: str) -> None:
         """ Sends a message to a topic on rabbitmq """
         self.channel.basic_publish(
-            exchange='topic_logs', routing_key=routing_key, body=message)
+            exchange='match', routing_key=routing_key, body=message)

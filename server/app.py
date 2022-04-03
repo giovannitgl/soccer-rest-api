@@ -31,5 +31,6 @@ def shutdown_queue():
     if settings.SEND_EVENTS_TO_QUEUE:
         app.rabbit_client.connection.close()
 
+
 Instrumentator().instrument(app).expose(app, include_in_schema=False)
 
