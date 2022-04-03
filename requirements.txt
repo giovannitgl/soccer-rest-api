@@ -6,3 +6,4 @@ sqlalchemy-utils==0.38.2
 alembic==1.7.7
 psycopg2==2.9.3
 pika==1.2.0
+prometheus-fastapi-instrumentator==5.7.1

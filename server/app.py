@@ -6,6 +6,8 @@ from server import settings
 from server.api.api_v1.api import api_router
 from server.queue.rabbitmq import RabbitClient
 
+from prometheus_fastapi_instrumentator import Instrumentator
+
 logger = logging.getLogger(__name__)
 
 
@@ -28,4 +30,6 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 def shutdown_queue():
     if settings.SEND_EVENTS_TO_QUEUE:
         app.rabbit_client.connection.close()
+
+Instrumentator().instrument(app).expose(app, include_in_schema=False)
 

@@ -1,0 +1,58 @@
+---
+# Soccer namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: soccer
+---
+# Enables the pods in a deployment to be accessible from outside the cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: soccer-api-svc
+  namespace: soccer
+spec:
+  selector:
+    app: soccer-api
+  ports:
+    - protocol: "TCP"
+      port: 8000
+      targetPort: 8000
+  type: LoadBalancer
+
+---
+# soccer-api Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: soccer-api
+  namespace: soccer
+  labels:
+    app: soccer-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: soccer-api
+  template:
+    metadata:
+      labels:
+        app: soccer-api
+    spec:
+      containers:
+        - name: soccer-api
+          image: k3d-local-registry:5000/soccer-api:latest
+          env:
+            - name: DATABASE_URL
+              value: "postgresql://postgres:postgres@postgresql-svc.common.svc.cluster.local:5432/db"
+            - name: SEND_EVENTS_TO_QUEUE
+              value: "true"
+            - name: RABBITMQ_HOST
+              value: "rabbitmq.common.svc.cluster.local"
+          ports:
+            - containerPort: 8000
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "200m"
